@@ -59,7 +59,7 @@ namespace wechat {
 
 			// unpack data...
 			if (($data = base64_decode($data, true)) === false)
-				throw new exception('Illegal base64 string present', exception::MALFORMED_ENCRYPTION);
+				throw new exception('Illegal base64 string present', exception::INVALID_ENCRYPTION);
 
 			// decrypt...
 			$data = mcrypt_decrypt(
@@ -74,13 +74,13 @@ namespace wechat {
 				$length = strlen($data);
 				if ($length >= 20) {
 					$size = unpack('N', substr($data, 16, 4))[1];
-					if ($length - 20 < $size) throw new exception('Malformed data', exception::MALFORMED_ENCRYPTION);
+					if ($length - 20 < $size) throw new exception('Malformed data', exception::INVALID_ENCRYPTION);
 					return substr($data, 20, $size);
 				}
 			}
 
 			throw new exception('Decryption failed',
-				exception::MALFORMED_ENCRYPTION);
+				exception::INVALID_ENCRYPTION);
 		}
 
 		/**

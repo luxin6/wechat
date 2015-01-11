@@ -12,6 +12,7 @@ namespace wechat {
 		 * @param string $id CORPID
 		 * @param string $secret 管理组的管理令牌
 		 * @param string $cainfo CA 文件名
+		 * @param string $host 地址
 		 */
 		public function __construct($id, $secret, $cainfo = null, $host = null) {
 
@@ -60,7 +61,7 @@ namespace wechat {
 		 *
 		 * @throws exception 调用接口时发生错误
 		 * @throws \InvalidArgumentException 给定的方法无效, 必须是 SEND 或 READ 常量
-		 * @throws \LogicException READ 方法里不允许传数据
+		 * @throws \LogicException 读取时不允许传数据
 		 * @return \stdClass 结果集
 		 */
 		public function execute($method, $path, array $queries = array(), $payload = null) {
@@ -132,14 +133,14 @@ namespace wechat {
 
 				// use constant() to avoid undefined warning...
 				switch ($error) {
-					case constant('JSON_ERROR_UTF8'): throw new exception('Malformed UTF-8 characters, possibly incorrectly encoded', exception::MALFORMED_JSON_STRING);
-					case constant('JSON_ERROR_SYNTAX'): throw new exception('Syntax error', exception::MALFORMED_JSON_STRING);
-					case constant('JSON_ERROR_STATE_MISMATCH'): throw new exception('Invalid or malformed JSON', exception::MALFORMED_JSON_STRING);
-					case constant('JSON_ERROR_CTRL_CHAR'): throw new exception('Control character error, possibly incorrectly encoded', exception::MALFORMED_JSON_STRING);
-					case constant('JSON_ERROR_DEPTH'): throw new exception('The maximum stack depth has been exceeded', exception::MALFORMED_JSON_STRING);
-					case constant('JSON_ERROR_RECURSION'): throw new exception('One or more recursive references in the value to be encoded', exception::MALFORMED_JSON_STRING);
-					case constant('JSON_ERROR_UNSPPORTED_TYPE'): throw new exception('A value of a type that cannot be encoded was given', exception::MALFORMED_JSON_STRING);
-					case constant('JSON_ERROR_INF_OR_NAN'): throw new exception('One or more NAN or INF in the value to be encoded', exception::MALFORMED_JSON_STRING);
+					case constant('JSON_ERROR_UTF8'): throw new exception('Malformed UTF-8 characters, possibly incorrectly encoded', exception::MALFORMED_JSON);
+					case constant('JSON_ERROR_SYNTAX'): throw new exception('Syntax error', exception::MALFORMED_JSON);
+					case constant('JSON_ERROR_STATE_MISMATCH'): throw new exception('Invalid or malformed JSON', exception::MALFORMED_JSON);
+					case constant('JSON_ERROR_CTRL_CHAR'): throw new exception('Control character error, possibly incorrectly encoded', exception::MALFORMED_JSON);
+					case constant('JSON_ERROR_DEPTH'): throw new exception('The maximum stack depth has been exceeded', exception::MALFORMED_JSON);
+					case constant('JSON_ERROR_RECURSION'): throw new exception('One or more recursive references in the value to be encoded', exception::MALFORMED_JSON);
+					case constant('JSON_ERROR_UNSPPORTED_TYPE'): throw new exception('A value of a type that cannot be encoded was given', exception::MALFORMED_JSON);
+					case constant('JSON_ERROR_INF_OR_NAN'): throw new exception('One or more NAN or INF in the value to be encoded', exception::MALFORMED_JSON);
 				}
 			}
 
