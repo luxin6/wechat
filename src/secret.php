@@ -1,6 +1,7 @@
 <?php
 namespace wechat {
-  /*final*/ class secret {
+  /** Encryption and signature management */
+  class secret {
 
     protected $id;
     protected $secret;
@@ -8,11 +9,11 @@ namespace wechat {
     protected $initialvector;
 
     /**
-     * 实例化类型
+     * Creates a new secret
      * @param string $id CORPID
-     * @param string $secret 应用的经过 Base64 编码的 AES 密钥
-     * @param string $salt 应用的 Token
-     * @throws \InvalidArgumentException 给定 AES 密钥无效或长度不为 32 字节
+     * @param string $secret base64 encoded AES secret (aka EncodingAESKey)
+     * @param string $salt Token
+     * @throws \InvalidArgumentException Malformed secret, not a base64 string/length not equals 32
      */
     public function __construct($id, $secret, $salt) {
 
@@ -35,9 +36,9 @@ namespace wechat {
     }
 
     /**
-     * 加密数据
-     * @param string $data 数据明文
-     * @return string 密文
+     * Encrypt plaintext
+     * @param string $data Plaintext
+     * @return string Ciphertext
      */
     public function encrypt($data) {
       return base64_encode(mcrypt_encrypt(
@@ -50,10 +51,10 @@ namespace wechat {
     }
 
     /**
-     * 解密数据
-     * @param string $data 密文
-     * @throws exception 无法解密, 给定的密文编码错误/格式错误/无效
-     * @return string 明文
+     * Decrypt ciphertext
+     * @param string $data Ciphertext
+     * @throws exception Decryption failed, not a base64 string or data structure invalid
+     * @return string Plaintext
      */
     public function decrypt($data) {
 
@@ -84,12 +85,12 @@ namespace wechat {
     }
 
     /**
-     * 生成数据签名
-     * @param int $timestamp Unix 时间戳
+     * Generate signature
+     * @param int $timestamp Unix timestamp
      * @param string $nonce nonce
-     * @param string $data 数据
-     * @param bool $binary 返回十六进制字符串或二进制字符串
-     * @return string 签名
+     * @param string $data data
+     * @param bool $binary returns binary string instead of hex string
+     * @return string
      */
     public function generate_signature($timestamp, $nonce, $data, $binary = false) {
       $data = array($this->salt, $timestamp, $nonce, $data);

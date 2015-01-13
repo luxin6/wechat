@@ -1,6 +1,7 @@
 <?php
 namespace wechat {
-  /*final*/ class client {
+  /** Low-level client */
+  class client {
 
     protected $id;
     protected $secret;
@@ -8,11 +9,11 @@ namespace wechat {
     protected $session;
 
     /**
-     * 实例化客户端
+     * Creates a new client
      * @param string $id CORPID
-     * @param string $secret 管理组的管理令牌
-     * @param string $cainfo CA 文件名
-     * @param string $host 地址
+     * @param string $secret Secret of management group
+     * @param string $cainfo CA filename
+     * @param string $host Host
      */
     public function __construct($id, $secret, $cainfo = null, $host = null) {
 
@@ -42,7 +43,7 @@ namespace wechat {
       $this->session = $session;
     }
 
-    /** 关闭连接并释放资源 */
+    /** Closes connection and releases resource */
     public function __destruct() {
       if ($this->session) {
         curl_close($this->session);
@@ -53,16 +54,16 @@ namespace wechat {
     const READ = CURLOPT_HTTPGET;
 
     /**
-     * 调用远程方法
-     * @param int $method 要使用的方法
-     * @param string $path 路径
-     * @param array $queries 参数数组
-     * @param object $payload 数据
+     * Calls to remote method
+     * @param int $method Request type
+     * @param string $path Path
+     * @param array $queries Array of arguments
+     * @param object $payload Data
      *
-     * @throws exception 调用接口时发生错误
-     * @throws \InvalidArgumentException 给定的方法无效, 必须是 SEND 或 READ 常量
-     * @throws \LogicException 读取时不允许传数据
-     * @return \stdClass 结果集
+     * @throws exception Remote method exception
+     * @throws \InvalidArgumentException Unrecognized request type, expected client::READ or client::SEND
+     * @throws \LogicException Set data not allowed
+     * @return \stdClass Result
      */
     public function execute($method, $path, array $queries = array(), $payload = null) {
 
