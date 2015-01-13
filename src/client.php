@@ -14,6 +14,7 @@ namespace wechat {
      * @param string $secret Secret of management group
      * @param string $cainfo CA filename
      * @param string $host Host
+     * @link http://curl.haxx.se/docs/caextract.html
      */
     public function __construct($id, $secret, $cainfo = null, $host = null) {
 
