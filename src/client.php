@@ -16,7 +16,7 @@ namespace wechat {
      * @param string $host Host
      * @link http://curl.haxx.se/docs/caextract.html
      */
-    public function __construct($id, $secret, $cainfo = null, $host = null) {
+    public function __construct($id, $secret, $host, $cainfo = null) {
 
       $session = curl_init();
       curl_setopt_array($session, array(
@@ -40,7 +40,7 @@ namespace wechat {
       // init...
       $this->id = $id;
       $this->secret = $secret;
-      $this->host = isset($host) ? $host : 'https://qyapi.weixin.qq.com/cgi-bin';
+      $this->host = $host;
       $this->session = $session;
     }
 

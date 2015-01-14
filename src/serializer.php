@@ -1,9 +1,6 @@
 <?php
 namespace wechat {
-  /**
-   * Wechat xml serializer
-   * @link http://qydev.weixin.qq.com/wiki/index.php?title=%E8%A2%AB%E5%8A%A8%E5%93%8D%E5%BA%94%E6%B6%88%E6%81%AF
-   */
+  /** Wechat xml serializer */
   final class serializer {
 
     /** This class should not instantiated */

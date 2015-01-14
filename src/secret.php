@@ -1,9 +1,6 @@
 <?php
 namespace wechat {
-  /**
-   * Encryption and signature management
-   * @link http://qydev.weixin.qq.com/wiki/index.php?title=%E5%8A%A0%E8%A7%A3%E5%AF%86%E6%96%B9%E6%A1%88%E7%9A%84%E8%AF%A6%E7%BB%86%E8%AF%B4%E6%98%8E
-   */
+  /** Encryption and signature management */
   class secret {
 
     protected $id;
