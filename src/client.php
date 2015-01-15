@@ -125,14 +125,14 @@ namespace wechat {
         throw new exception(isset($data->errmsg) ? $data->errmsg : null, $data->errcode);
       return $data;
     }
-  }
 
-  /**
-   * Serialize array/object as JSON string
-   * @param array|object $data Data
-   * @return string
-   */
-  protected function serialize($data) {
-    return json_encode($data, JSON_UNESCAPED_UNICODE);
+    /**
+     * Serialize array/object as JSON string
+     * @param array|object $data Data
+     * @return string
+     */
+    protected function serialize($data) {
+      return json_encode($data, JSON_UNESCAPED_UNICODE);
+    }
   }
 }
