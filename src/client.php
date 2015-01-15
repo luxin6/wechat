@@ -1,26 +1,23 @@
 <?php
 namespace wechat {
-  /** Low-level client */
+  /** Low level client for mp and enterprise */
   class client {
 
-    protected $id;
-    protected $secret;
     protected $host;
-    protected $session;
+    protected $connection;
+    protected $cainfo;
 
     /**
      * Creates a new client
-     * @param string $id CORPID
-     * @param string $secret Secret of management group
+     * @param string $host Hostname
      * @param string $cainfo CA filename
-     * @param string $host Host
      * @link http://curl.haxx.se/docs/caextract.html
      */
-    public function __construct($id, $secret, $host, $cainfo = null) {
+    public function __construct($host, $cainfo = null) {
 
-      $session = curl_init();
-      curl_setopt_array($session, array(
-        CURLOPT_TIMEOUT => 120,
+      $connection = curl_init();
+      curl_setopt_array($connection, array(
+        CURLOPT_TIMEOUT => 10,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_BINARYTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
@@ -28,27 +25,24 @@ namespace wechat {
         CURLOPT_SSL_VERIFYPEER => false
       ));
 
-      // enable ssl verification...
+      // enable ssl verification if cainfo present...
       if (isset($cainfo)) {
-        curl_setopt_array($session, array(
+        curl_setopt_array($connection, array(
           CURLOPT_SSL_VERIFYPEER => true,
-          CURLOPT_SSL_VERIFYHOST => 2,
-          CURLOPT_CAINFO => $cainfo
+          CURLOPT_CAINFO => $cainfo,
+          CURLOPT_SSL_VERIFYHOST => 2
         ));
       }
 
-      // init...
-      $this->id = $id;
-      $this->secret = $secret;
       $this->host = $host;
-      $this->session = $session;
+      $this->connection = $connection;
+      $this->cainfo = $cainfo;
     }
 
     /** Closes connection and releases resource */
     public function __destruct() {
-      if ($this->session) {
-        curl_close($this->session);
-      }
+      if ($this->connection)
+        curl_close($this->connection);
     }
 
     const SEND = CURLOPT_POST;
@@ -56,85 +50,66 @@ namespace wechat {
 
     /**
      * Calls to remote method
-     * @param int $method Request type
-     * @param string $path Path
-     * @param array $queries Array of arguments
-     * @param object $payload Data
+     * @param int $method Action
+     * @param string $path Path with parameters
+     * @param string $payload Data
      *
-     * @throws exception Remote method exception
-     * @throws \InvalidArgumentException Unrecognized request type, expected client::READ or client::SEND
+     * @throws exception Remote exception
+     * @throws \InvalidArgumentException Unrecognized action, expected client::READ or client::SEND
      * @throws \LogicException Set data not allowed
-     * @return \stdClass Result
+     * @return \stdClass
      */
-    public function execute($method, $path, array $queries = array(), $payload = null) {
+    public function execute($method, $path, $payload = null) {
 
       // check method...
-      if ($method !== self::SEND &&
-          $method !== self::READ)
-        throw new \InvalidArgumentException('unrecognized method was given');
+      if ($method !== self::READ && $method !== self::SEND)
+        throw new \InvalidArgumentException('Unrecognized action, expected client::READ or client::SEND');
 
-      // append access_token...
-      $queries['access_token'] = $this->access_token();
-
-      $session = $this->session;
-      curl_setopt_array($session, array(
+      $connection = &$this->connection;
+      curl_setopt_array($connection, array(
         $method => true,
-        CURLOPT_URL => $this->host.$path.'?'.http_build_query($queries),
+        CURLOPT_URL => $this->host.$path,
         CURLOPT_HTTPHEADER => array(),
         CURLOPT_POSTFIELDS => null
       ));
 
-      // add payload...
+      // set request body...
       if (isset($payload)) {
-        if ($method === self::READ) throw new \LogicException('set payload not allowed here');
-        curl_setopt_array($session, array(
+        if ($method === self::READ) throw new \LogicException('Set data not allowed');
+        curl_setopt_array($connection, array(
           CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
           CURLOPT_POSTFIELDS => $this->serialize($payload)
         ));
       }
 
+      // send request and parse response as stdClass...
       return $this->response();
     }
 
-    protected function access_token(&$expiration = 0) {
-
-      $session = $this->session;
-      curl_setopt_array($session, array(
-        CURLOPT_HTTPGET => true,
-        CURLOPT_URL => $this->host.'/gettoken?'.http_build_query(array(
-          'corpsecret' => $this->secret,
-          'corpid' => $this->id
-        ))
-      ));
-
-      $response = $this->response();
-      if (!isset($response->access_token) || !preg_match('!^[\w\-\+\=/]+$!', $response->access_token))
-        throw new exception('Malformed ACCESS_TOKEN from server',
-          exception::MALFORMED_ACCESS_TOKEN);
-
-      // find & set expiration
-      if (isset($response->expires_in)) {
-        $value = filter_var($response->expires_in, FILTER_VALIDATE_INT);
-        if ($value > 0)
-          $expiration = $value;
-      }
-
-      return $response->access_token;
-    }
-
+    /**
+     * Get response
+     * @throws exception Server busy
+     * @return \sdtClass
+     */
     protected function response() {
-      $response = curl_exec($this->session);
-      if ($response !== false && curl_getinfo($this->session, CURLINFO_HTTP_CODE) < 400) return $this->parse($response);
+      $result = curl_exec($this->connection);
+      if ($result !== false && curl_getinfo($this->connection, CURLINFO_HTTP_CODE) < 400) return $this->parse($result);
       throw new exception('Server busy', exception::SERVER_BUSY);
     }
 
+    /**
+     * Parse json as stdClass, and check remote exception
+     * @param string $data JSON string
+     * @throws exception Remote exception or Malformed json found
+     * @return \stdClass
+     */
     protected function parse($data) {
 
       $data = json_decode($data);
-      if ($error = json_last_error()) {
+      if ($errorcode = json_last_error()) {
 
         // use constant() to avoid undefined warning...
-        switch ($error) {
+        switch ($errorcode) {
           case constant('JSON_ERROR_UTF8'): throw new exception('Malformed UTF-8 characters, possibly incorrectly encoded', exception::MALFORMED_JSON);
           case constant('JSON_ERROR_SYNTAX'): throw new exception('Syntax error', exception::MALFORMED_JSON);
           case constant('JSON_ERROR_STATE_MISMATCH'): throw new exception('Invalid or malformed JSON', exception::MALFORMED_JSON);
@@ -150,9 +125,14 @@ namespace wechat {
         throw new exception(isset($data->errmsg) ? $data->errmsg : null, $data->errcode);
       return $data;
     }
+  }
 
-    protected function serialize($data) {
-      return json_encode($data, JSON_UNESCAPED_UNICODE);
-    }
+  /**
+   * Serialize array/object as JSON string
+   * @param array|object $data Data
+   * @return string
+   */
+  protected function serialize($data) {
+    return json_encode($data, JSON_UNESCAPED_UNICODE);
   }
 }
