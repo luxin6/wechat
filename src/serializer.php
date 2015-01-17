@@ -189,20 +189,13 @@ namespace wechat {
       if (!isset($music['ThumbMediaId']))
         throw new \InvalidArgumentException('Invalid entity, it must includes ThumbMediaId property');
 
-      $data = array(
+      return self::stringify(array(
         'ToUserName' => $to,
         'FromUserName' => $from,
         'MsgType' => 'music',
         'CreateTime' => time(),
-        'ThumbMediaId' => $music['ThumbMediaId']
-      );
-
-      if (isset($music['Title'])) $data['Title'] = $music['Title'];
-      if (isset($music['Description'])) $data['Description'] = $music['Description'];
-      if (isset($music['MusicURL'])) $data['MusicURL'] = $music['MusicURL'];
-      if (isset($music['HQMusicUrl'])) $data['HQMusicUrl'] = $music['HQMusicUrl'];
-
-      return self::stringify($data);
+        'Music' => $music
+      ));
     }
   }
 }

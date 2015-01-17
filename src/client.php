@@ -128,14 +128,11 @@ namespace wechat {
      * @param \InvalidArgumentException Unsupported content type
      * @return void
      */
-    protected function set_payload($data) {
-
-      $data = json_encode($data, JSON_UNESCAPED_UNICODE);
-      if ($data === false) throw new \InvalidArgumentException("Unsupported content type");
-
+    protected function set_payload($value) {
       curl_setopt_array($this->connection, array(
         CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
-        CURLOPT_POSTFIELDS => $data
+        CURLOPT_POSTFIELDS => json_encode($value,
+          JSON_UNESCAPED_UNICODE)
       ));
     }
   }
