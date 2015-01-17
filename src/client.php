@@ -65,8 +65,7 @@ namespace wechat {
       if ($method !== self::READ && $method !== self::SEND)
         throw new \InvalidArgumentException('Unrecognized action, expected client::READ or client::SEND');
 
-      $connection = &$this->connection;
-      curl_setopt_array($connection, array(
+      curl_setopt_array($this->connection, array(
         $method => true,
         CURLOPT_URL => $this->host.$path,
         CURLOPT_HTTPHEADER => array(),
@@ -76,10 +75,7 @@ namespace wechat {
       // set request body...
       if (isset($payload)) {
         if ($method === self::READ) throw new \LogicException('Set data not allowed');
-        curl_setopt_array($connection, array(
-          CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
-          CURLOPT_POSTFIELDS => $this->serialize($payload)
-        ));
+        $this->set_payload($payload);
       }
 
       // send request and parse response as stdClass...
@@ -127,12 +123,20 @@ namespace wechat {
     }
 
     /**
-     * Serialize array/object as JSON string
+     * Set payload
      * @param array|object $data Data
-     * @return string
+     * @param \InvalidArgumentException Unsupported content type
+     * @return void
      */
-    protected function serialize($data) {
-      return json_encode($data, JSON_UNESCAPED_UNICODE);
+    protected function set_payload($data) {
+
+      $data = json_encode($data, JSON_UNESCAPED_UNICODE);
+      if ($data === false) throw new \InvalidArgumentException("Unsupported content type");
+
+      curl_setopt_array($this->connection, array(
+        CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
+        CURLOPT_POSTFIELDS => $data
+      ));
     }
   }
 }

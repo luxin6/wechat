@@ -174,5 +174,35 @@ namespace wechat {
         'Articles' => $articles
       ));
     }
+
+    /**
+     * Creates music message
+     * @param string $from Sender ID
+     * @param string $to Recipient ID
+     * @param array $music Music entity
+     * @throws \InvalidArgumentException Invalid entity, it must includes ThumbMediaId property
+     * @return string XML
+     */
+    public static function music($from, $to, array $music) {
+
+      // validate...
+      if (!isset($music['ThumbMediaId']))
+        throw new \InvalidArgumentException('Invalid entity, it must includes ThumbMediaId property');
+
+      $data = array(
+        'ToUserName' => $to,
+        'FromUserName' => $from,
+        'MsgType' => 'music',
+        'CreateTime' => time(),
+        'ThumbMediaId' => $music['ThumbMediaId']
+      );
+
+      if (isset($music['Title'])) $data['Title'] = $music['Title'];
+      if (isset($music['Description'])) $data['Description'] = $music['Description'];
+      if (isset($music['MusicURL'])) $data['MusicURL'] = $music['MusicURL'];
+      if (isset($music['HQMusicUrl'])) $data['HQMusicUrl'] = $music['HQMusicUrl'];
+
+      return self::stringify($data);
+    }
   }
 }
