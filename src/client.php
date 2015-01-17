@@ -4,20 +4,27 @@ namespace wechat {
   class client {
 
     protected $host;
-    protected $connection;
+    protected $timeout;
     protected $cainfo;
 
     /**
-     * Creates a new client
-     * @param string $host Hostname
+     * Creates new client
+     * @param string $host Host
      * @param string $cainfo CA filename
+     * @param bool $timedout Timedout in seconds
      * @link http://curl.haxx.se/docs/caextract.html
      */
-    public function __construct($host, $cainfo = null) {
+    public function __construct($host, $cainfo = null, $timedout = 10) {
+      $this->host = $host;
+      $this->timedout = $timedout;
+      $this->cainfo = $cainfo;
+    }
 
-      $connection = curl_init();
-      curl_setopt_array($connection, array(
-        CURLOPT_TIMEOUT => 10,
+    private function init() {
+
+      $session = curl_init();
+      curl_setopt_array($session, array(
+        CURLOPT_TIMEOUT => $this->timedout,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_BINARYTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
@@ -26,23 +33,15 @@ namespace wechat {
       ));
 
       // enable ssl verification if cainfo present...
-      if (isset($cainfo)) {
-        curl_setopt_array($connection, array(
+      if (isset($this->cainfo)) {
+        curl_setopt_array($session, array(
           CURLOPT_SSL_VERIFYPEER => true,
-          CURLOPT_CAINFO => $cainfo,
+          CURLOPT_CAINFO => $this->cainfo,
           CURLOPT_SSL_VERIFYHOST => 2
         ));
       }
 
-      $this->host = $host;
-      $this->connection = $connection;
-      $this->cainfo = $cainfo;
-    }
-
-    /** Closes connection and releases resource */
-    public function __destruct() {
-      if ($this->connection)
-        curl_close($this->connection);
+      return $session;
     }
 
     const SEND = CURLOPT_POST;
@@ -52,44 +51,48 @@ namespace wechat {
      * Calls to remote method
      * @param int $method Action
      * @param string $path Path with parameters
-     * @param string $payload Data
+     * @param string $data Data
      *
      * @throws exception Remote exception
      * @throws \InvalidArgumentException Unrecognized action, expected client::READ or client::SEND
      * @throws \LogicException Set data not allowed
      * @return \stdClass
      */
-    public function execute($method, $path, $payload = null) {
+    public function execute($method, $path, $data = null) {
 
       // check method...
       if ($method !== self::READ && $method !== self::SEND)
         throw new \InvalidArgumentException('Unrecognized action, expected client::READ or client::SEND');
 
-      curl_setopt_array($this->connection, array(
+      $session = $this->init();
+      curl_setopt_array($session, array(
         $method => true,
         CURLOPT_URL => $this->host.$path,
-        CURLOPT_HTTPHEADER => array(),
-        CURLOPT_POSTFIELDS => null
+        CURLOPT_HTTPHEADER => array('Expect:'),
+        CURLOPT_HTTPPROXYTUNNEL => true,
+        CURLOPT_PROXY => 'http://127.0.0.1:8888'
       ));
 
       // set request body...
-      if (isset($payload)) {
+      if (isset($data)) {
         if ($method === self::READ) throw new \LogicException('Set data not allowed');
-        $this->set_payload($payload);
+        $this->setdata($session, $data);
       }
 
-      // send request and parse response as stdClass...
-      return $this->response();
+      $result = $this->get_response($session);
+      curl_close($session);
+      return $result;
     }
 
     /**
      * Get response
+     * @param resource $session HTTP request
      * @throws exception Server busy
      * @return \sdtClass
      */
-    protected function response() {
-      $result = curl_exec($this->connection);
-      if ($result !== false && curl_getinfo($this->connection, CURLINFO_HTTP_CODE) < 400) return $this->parse($result);
+    protected function get_response($session) {
+      $result = curl_exec($session);
+      if ($result !== false && curl_getinfo($session, CURLINFO_HTTP_CODE) < 400) return $this->parse($result);
       throw new exception('Server busy', exception::SERVER_BUSY);
     }
 
@@ -124,12 +127,12 @@ namespace wechat {
 
     /**
      * Set payload
+     * @param resource $session HTTP request
      * @param array|object $data Data
-     * @param \InvalidArgumentException Unsupported content type
      * @return void
      */
-    protected function set_payload($value) {
-      curl_setopt_array($this->connection, array(
+    protected function setdata($session, $value) {
+      curl_setopt_array($session, array(
         CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
         CURLOPT_POSTFIELDS => json_encode($value,
           JSON_UNESCAPED_UNICODE)
