@@ -68,15 +68,13 @@ namespace wechat {
       curl_setopt_array($session, array(
         $method => true,
         CURLOPT_URL => $this->host.$path,
-        CURLOPT_HTTPHEADER => array('Expect:'),
-        CURLOPT_HTTPPROXYTUNNEL => true,
-        CURLOPT_PROXY => 'http://127.0.0.1:8888'
+        CURLOPT_HTTPHEADER => array('Expect:')
       ));
 
       // set request body...
       if (isset($data)) {
         if ($method === self::READ) throw new \LogicException('Set data not allowed');
-        $this->setdata($session, $data);
+        $this->set_body($session, $data);
       }
 
       $result = $this->get_response($session);
@@ -128,10 +126,10 @@ namespace wechat {
     /**
      * Set payload
      * @param resource $session HTTP request
-     * @param array|object $data Data
+     * @param array|object $value Data
      * @return void
      */
-    protected function setdata($session, $value) {
+    protected function set_body($session, $value) {
       curl_setopt_array($session, array(
         CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
         CURLOPT_POSTFIELDS => json_encode($value,
