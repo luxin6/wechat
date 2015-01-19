@@ -14,6 +14,7 @@ namespace wechat\enterprise {
      * @param string $type Filetype of media
      * @param string $resource Stream or filename with "@" prefix
      * @param string $extension File extension name
+     * @throws \InvalidArgumentException Can not read file contents
      * @return \stdClass Result
      */
     public function upload($type, $resource, $extension = null) {
