@@ -15,9 +15,10 @@ namespace wechat\enterprise {
      * @param string $id corpid
      * @param string $secret Secret of management group
      * @param string $cainfo CA filename
+     * @param int $timedout Timedout in seconds
      */
-    public function __construct($id, $secret, $cainfo = null) {
-      parent::__construct('https://qyapi.weixin.qq.com/cgi-bin', $cainfo);
+    public function __construct($id, $secret, $cainfo = null, $timedout = 10) {
+      parent::__construct('https://qyapi.weixin.qq.com/cgi-bin', $cainfo, $timedout);
       $this->secret = $secret;
       $this->id = $id;
     }

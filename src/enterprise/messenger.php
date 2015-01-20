@@ -106,21 +106,23 @@ namespace wechat\enterprise {
      * @return void
      */
     public function send_news($sender, array $recipients, array $articles) {
+      if (!empty($articles)) {
 
-      // validate article...
-      foreach ($articles as $article) {
-        $value = (array)$article;
-        if (!isset($value['Title'], $value['Description'], $value['PicUrl'], $value['Url'])) {
-          throw new \InvalidArgumentException('invalid article found');
+        // validate article...
+        foreach ($articles as $article) {
+          $value = (array)$article;
+          if (!isset($value['Title'], $value['Description'], $value['PicUrl'], $value['Url'])) {
+            throw new \InvalidArgumentException('invalid article found');
+          }
         }
-      }
 
-      $this->send(array(
-        'msgtype' => 'mpnews',
-        'touser' => implode(self::SEPARATOR, $recipients),
-        'agentid' => $sender,
-        'news' => $articles
-      ));
+        $this->send(array(
+          'msgtype' => 'mpnews',
+          'touser' => implode(self::SEPARATOR, $recipients),
+          'agentid' => $sender,
+          'news' => $articles
+        ));
+      }
     }
 
     /**
@@ -133,22 +135,24 @@ namespace wechat\enterprise {
      * @return void
      */
     public function send_newsplus($sender, array $recipients, array $articles, $security = true) {
+      if (!empty($articles)) {
 
-      // validate article...
-      foreach ($articles as $article) {
-        $value = (array)$article;
-        if (!isset($value['Title'], $value['Description'], $value['PicUrl'], $value['Url'])) {
-          throw new \InvalidArgumentException('invalid article found');
+        // validate article...
+        foreach ($articles as $article) {
+          $value = (array)$article;
+          if (!isset($value['Title'], $value['Description'], $value['PicUrl'], $value['Url'])) {
+            throw new \InvalidArgumentException('invalid article found');
+          }
         }
-      }
 
-      $this->send(array(
-        'msgtype' => 'mpnews',
-        'safe' => $security,
-        'touser' => implode(self::SEPARATOR, $recipients),
-        'agentid' => $sender,
-        'news' => $articles
-      ));
+        $this->send(array(
+          'msgtype' => 'mpnews',
+          'safe' => $security,
+          'touser' => implode(self::SEPARATOR, $recipients),
+          'agentid' => $sender,
+          'news' => $articles
+        ));
+      }
     }
 
     /**
