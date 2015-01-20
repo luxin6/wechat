@@ -20,7 +20,7 @@ namespace wechat {
       $this->cainfo = $cainfo;
     }
 
-    private function init() {
+    protected function init() {
 
       $session = curl_init();
       curl_setopt_array($session, array(
