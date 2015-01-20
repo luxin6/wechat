@@ -2,7 +2,7 @@
 namespace wechat\enterprise {
 
   /** Messenger */
-  final class messenger extends client {
+  class messenger extends client {
 
     /**
      * Shorthand method...
