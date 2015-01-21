@@ -5,8 +5,8 @@ namespace wechat\enterprise {
   class appmenu extends client {
 
     /**
-     * Finds application's menu
-     * @param int $id Application identifier
+     * Finds menu
+     * @param int $id APPID
      * @return \stdClass
      */
     public function find($id) {
@@ -17,8 +17,8 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates or updates application's menu
-     * @param int $id Application identifier
+     * Creates or updates menu
+     * @param int $id APPID
      * @param array[] $menus Menus
      * @return void
      */
@@ -34,8 +34,8 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Clear application's menu
-     * @param int $id Application identifier
+     * Clear all menu
+     * @param int $id APPID
      * @return void
      */
     public function clear($id) {
@@ -46,13 +46,26 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents click-only button
+     * Creates a group contains one upto five button
+     * @param string $name Name
+     * @param \stdClass[] $childrens Childrens
+     * @return \stdClass
+     */
+    public static function group($name, array $childrens = array()) {
+      $menu = new \stdClass();
+      $menu->name = $name;
+      $menu->sub_button = $childrens;
+      return $menu;
+    }
+
+    /**
+     * Creates a click button
      * @param string $id Button key
      * @param string $name Button text
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_button($id, $name, array $childrens = array()) {
+    public static function button($id, $name, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->key = $id;
       $menu->type = 'click';
@@ -62,13 +75,13 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents view button
+     * Creates a view button
      * @param string $name Button text
      * @param string $url URL
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_view($name, $uri, array $childrens = array()) {
+    public static function link($name, $uri, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->type = 'view';
       $menu->sub_button = $childrens;
@@ -78,13 +91,13 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents scancode_push button
+     * Creates a scancode_push button
      * @param string $id Button key
      * @param string $name Button text
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_scanner($id, $name, array $childrens = array()) {
+    public static function scanner($id, $name, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->key = $id;
       $menu->type = 'scancode_push';
@@ -94,13 +107,13 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents scancode_waitmsg button
+     * Creates a scancode_waitmsg button
      * @param string $id Button key
      * @param string $name Button text
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_waitable_scanner($id, $name, array $childrens = array()) {
+    public static function waitable_scanner($id, $name, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->key = $id;
       $menu->type = 'scancode_waitmsg';
@@ -110,13 +123,13 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents pic_sysphoto button
+     * Creates a pic_sysphoto button
      * @param string $id Button key
      * @param string $name Button text
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_camera($id, $name, array $childrens = array()) {
+    public static function camera($id, $name, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->key = $id;
       $menu->type = 'pic_sysphoto';
@@ -126,13 +139,13 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents pic_photo_or_album button
+     * Creates a pic_photo_or_album button
      * @param string $id Button key
      * @param string $name Button text
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_photo_selector($id, $name, array $childrens = array()) {
+    public static function photo_selector($id, $name, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->key = $id;
       $menu->type = 'pic_photo_or_album';
@@ -142,13 +155,13 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents pic_weixin button
+     * Creates a pic_weixin button
      * @param string $id Button key
      * @param string $name Button text
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_wechat_photo_selector($id, $name, array $childrens = array()) {
+    public static function wechat_photo_selector($id, $name, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->key = $id;
       $menu->type = 'pic_weixin';
@@ -158,13 +171,13 @@ namespace wechat\enterprise {
     }
 
     /**
-     * Creates an object represents location_select button
+     * Creates a location_select button
      * @param string $id Button key
      * @param string $name Button text
      * @param \stdClass[] $childrens Childrens
      * @return \stdClass
      */
-    public static function create_locator($id, $name, array $childrens = array()) {
+    public static function locator($id, $name, array $childrens = array()) {
       $menu = new \stdClass();
       $menu->key = $id;
       $menu->type = 'location_select';

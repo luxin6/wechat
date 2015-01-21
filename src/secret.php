@@ -1,5 +1,6 @@
 <?php
 namespace wechat {
+
   /** Encryption and signature management */
   class secret {
 
