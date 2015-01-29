@@ -1,17 +1,19 @@
 <?php
 namespace wechat {
-  /** Low level client for mp and enterprise */
+
+  /** Low level client for mp, service and enterprise */
   class client {
 
-    protected $host;
-    protected $timeout;
-    protected $cainfo;
+    public $host;
+    public $timedout;
+    public $cainfo;
 
     /**
-     * Creates new client
+     * Creates a client
      * @param string $host Host
-     * @param string $cainfo CA filename
      * @param bool $timedout Timedout in seconds
+     * @param string $cainfo CA filename
+     *
      * @link http://curl.haxx.se/docs/caextract.html
      */
     public function __construct($host, $cainfo = null, $timedout = 10) {
@@ -67,8 +69,7 @@ namespace wechat {
       $session = $this->init();
       curl_setopt_array($session, array(
         $method => true,
-        CURLOPT_URL => $this->host.$path,
-        CURLOPT_HTTPHEADER => array('Expect:')
+        CURLOPT_URL => $this->host.$path
       ));
 
       // set request body...
@@ -131,7 +132,7 @@ namespace wechat {
      */
     protected function set_body($session, $value) {
       curl_setopt_array($session, array(
-        CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
+        CURLOPT_HTTPHEADER => array('Content-Type: application/json;charset=utf-8', 'Expect:'),
         CURLOPT_POSTFIELDS => json_encode($value,
           JSON_UNESCAPED_UNICODE)
       ));
