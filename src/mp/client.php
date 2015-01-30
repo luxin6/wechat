@@ -7,7 +7,7 @@ namespace wechat\mp {
     protected $id;
     protected $secret;
     protected $access_token;
-    protected $access_token_expiration;
+    protected $expiration;
 
     /**
      * Creates a new client
@@ -18,7 +18,7 @@ namespace wechat\mp {
      */
     public function __construct($id, $secret, $cainfo = null, $timedout = 10, $host = 'https://api.weixin.qq.com/cgi-bin') {
       parent::__construct($host, $cainfo, $timedout);
-      $this->access_token_expiration = 0;
+      $this->expiration = 0;
       $this->secret = $secret;
       $this->id = $id;
     }
@@ -32,7 +32,7 @@ namespace wechat\mp {
     public function access_token(&$expiration = 0) {
 
       // not found or expired
-      if (!isset($this->access_token) || $this->access_token_expiration - time() <= 0) {
+      if (!isset($this->access_token) || $this->expiration - time() <= 0) {
 
         // send request...
         $response = $this->execute(self::READ, '/token?'.http_build_query(array(
@@ -50,13 +50,13 @@ namespace wechat\mp {
         if (isset($response->expires_in)) {
           $value = filter_var($response->expires_in, FILTER_VALIDATE_INT);
           if ($value > 0)
-            $this->access_token_expiration = strtotime(sprintf("+%d secs", $value));
+            $this->expiration = strtotime(sprintf("+%d secs", $value));
         }
 
         $this->access_token = $response->access_token;
       }
 
-      $expiration = $this->access_token_expiration - time();
+      $expiration = $this->expiration - time();
       return $this->access_token;
     }
 
