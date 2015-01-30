@@ -9,23 +9,18 @@ namespace wechat\mp {
     const THUMBNAILS = 'thumb';
     const VIDEO = 'video';
 
-    private $shost;
-    private $scainfo;
+    private $cached_host;
 
     // switch host to http://file.api.weixin.qq.com/cgi-bin...
     private function fuck_host() {
-      $this->shost = $this->host;
-      $this->scainfo = $this->cainfo;
+      $this->cached_host = $this->host;
       $this->host = 'http://file.api.weixin.qq.com/cgi-bin';
-      $this->cainfo = null;
     }
 
     // restore host...
-    private function restore_host() {
-      $this->host = $this->shost;
-      $this->cainfo = $this->scainfo;
-      $this->shost = null;
-      $this->scainfo = null;
+    private function end_host() {
+      $this->host = $this->cached_host;
+      $this->cached_host = null;
     }
 
     /**
@@ -71,7 +66,7 @@ namespace wechat\mp {
         'type' => $type
       )), $data);
 
-      $this->restore_host();
+      $this->end_host();
       $this->extension = null;
       return $result;
     }
