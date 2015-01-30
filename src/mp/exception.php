@@ -5,5 +5,7 @@ namespace wechat\mp {
     const INVALID_AUTHORZATION_TYPE = 40002;
     const MISSING_APPID = 41002;
     const MISSING_APPSECRET = 41004;
+    const EMPTY_MEDIA = 41005;
+    const INVALID_MEDIA_TYPE = 40004;
   }
 }
